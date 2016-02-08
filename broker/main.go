@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"log"
 	"net/http"
 	"os"
 )
@@ -39,14 +40,17 @@ func main() {
 
 	// Setup webhook handler
 	go func() {
+		log.Println("Starting webserver..")
 		http.HandleFunc(config.Token, webhook)
 		err := http.ListenAndServe(config.BindServer, nil)
 		assert(err)
 	}()
 
 	// Register webhook @ Telegram
+	log.Println("Registering webhook..")
 	api.setWebhook(config.BaseURL + config.WebhookURL)
 
 	// Create server for clients
+	log.Println("Starting clients server..")
 	startClientsServer(config.BindClients)
 }

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"encoding/json"
 	"log"
 	"net/http"
 	"net/url"
@@ -23,9 +23,11 @@ func (t Telegram) setWebhook(webhook string) {
 	resp, err := http.PostForm(t.apiURL("setWebhook"), url.Values{"url": {webhook}})
 	if !checkerr("setWebhook", err) {
 		defer resp.Body.Close()
-		data, err := ioutil.ReadAll(resp.Body)
+		var result tg.APIResponse
+		err = json.NewDecoder(resp.Body).Decode(&result)
 		if err != nil {
-			log.Printf("setWebhook result: %s\n", string(data))
+			log.Println("Could not read reply: " + err.Error())
+			return
 		}
 	}
 }

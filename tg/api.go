@@ -118,3 +118,9 @@ type APIUpdate struct {
 	UpdateID int        `json:"update_id"`
 	Message  APIMessage `json:"message"`
 }
+
+type APIResponse struct {
+	Ok          bool    `json:"ok"`
+	ErrCode     *int    `json:"error_code,omitempty"`
+	Description *string `json:"description,omitempty"`
+}
