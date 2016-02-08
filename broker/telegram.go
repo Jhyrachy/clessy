@@ -30,11 +30,11 @@ func (t Telegram) setWebhook(webhook string) {
 	}
 }
 
-func (t Telegram) apiURL(method string) {
+func (t Telegram) apiURL(method string) string {
 	return APIEndpoint + "bot" + t.Token + "/" + method
 }
 
-func checkerr(method string, err error) {
+func checkerr(method string, err error) bool {
 	if err != nil {
 		log.Printf("Received error with call to %s: %s\n", method, err.Error())
 		return true

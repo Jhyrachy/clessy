@@ -50,7 +50,7 @@ func handleClient(c net.Conn) {
 }
 
 func removeCon(c net.Conn) {
-	for i, con := range Clients {
+	for i, con := range clients {
 		if c == con {
 			clients = append(clients[:i], clients[i+1:]...)
 		}

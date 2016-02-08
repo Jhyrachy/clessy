@@ -21,7 +21,7 @@ func assert(err error) {
 	}
 }
 
-var api Telegram
+var api *Telegram
 
 func main() {
 	cfgpath := flag.String("config", "config.json", "Path to configuration file")
@@ -39,7 +39,7 @@ func main() {
 
 	// Setup webhook handler
 	go func() {
-		http.HandlerFunc(config.Token, webhook)
+		http.HandleFunc(config.Token, webhook)
 		err := http.ListenAndServe(config.BindServer, nil)
 		assert(err)
 	}()

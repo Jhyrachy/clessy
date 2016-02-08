@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"../tg"
 )
 
 func webhook(rw http.ResponseWriter, req *http.Request) {

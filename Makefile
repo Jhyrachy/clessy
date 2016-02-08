@@ -1,4 +1,4 @@
-all: broker
+all: clessy-broker
 
-broker:
+clessy-broker:
 	go build -o clessy-broker ./broker
