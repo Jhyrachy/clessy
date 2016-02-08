@@ -1,3 +1,7 @@
 {
-	
+	"BindServer" : ":7313",
+	"BindClients": "127.0.0.1:7314",
+	"Token"      : "Bot token here",
+	"BaseURL"    : "https://my.bot.host",
+	"WebhookURL" : "/secret_url_here"
 }
