@@ -2,9 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"net/url"
+
+	"../tg"
 )
 
 const APIEndpoint = "https://api.telegram.org/"
@@ -28,6 +31,12 @@ func (t Telegram) setWebhook(webhook string) {
 		if err != nil {
 			log.Println("Could not read reply: " + err.Error())
 			return
+		}
+		if result.Ok {
+			log.Println("Webhook successfully set!")
+		} else {
+			log.Printf("Error setting webhook (errcode %d): %s\n", *(result.ErrCode), *(result.Description))
+			panic(errors.New("Cannot set webhook"))
 		}
 	}
 }
