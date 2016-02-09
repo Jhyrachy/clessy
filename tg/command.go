@@ -7,7 +7,9 @@ const (
 )
 
 type ClientTextMessageData struct {
-	Text string
+	ChatID  int
+	Text    string
+	ReplyID *int
 }
 
 type ClientCommand struct {

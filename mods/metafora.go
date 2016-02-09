@@ -28,7 +28,7 @@ func metafora(broker *tg.Broker, update tg.APIMessage) {
 		if *(update.Text) == "/metafora" {
 			n := rand.Intn(len(actions))
 			m := rand.Intn(len(objects))
-			broker.SendTextMessage(update.Chat, actions[n]+" "+objects[m])
+			broker.SendTextMessage(update.Chat, actions[n]+" "+objects[m], nil)
 			return
 		}
 	}

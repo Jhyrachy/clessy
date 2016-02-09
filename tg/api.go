@@ -17,7 +17,7 @@ const (
 )
 
 type APIChat struct {
-	UserID    int      `json:"id"`
+	ChatID    int      `json:"id"`
 	Type      ChatType `json:"type"`
 	Title     *string  `json:"title,omitempty"`
 	Username  *string  `json:"username,omitempty"`

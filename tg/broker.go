@@ -26,11 +26,13 @@ func (b *Broker) Close() {
 	b.Socket.Close()
 }
 
-func (b *Broker) SendTextMessage(chat *APIChat, text string) {
+func (b *Broker) SendTextMessage(chat *APIChat, text string, original *int) {
 	cmd := ClientCommand{
 		Type: CmdSendTextMessage,
 		TextMessageData: &ClientTextMessageData{
-			Text: text,
+			Text:    text,
+			ChatID:  chat.ChatID,
+			ReplyID: original,
 		},
 	}
 	// Encode command and send to broker

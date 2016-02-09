@@ -48,7 +48,7 @@ func main() {
 
 	// Register webhook @ Telegram
 	log.Println("Registering webhook..")
-	api.setWebhook(config.BaseURL + config.WebhookURL)
+	api.SetWebhook(config.BaseURL + config.WebhookURL)
 
 	// Create server for clients
 	log.Println("Starting clients server..")

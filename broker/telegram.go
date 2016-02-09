@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"../tg"
 )
@@ -22,23 +23,37 @@ func mkAPI(token string) *Telegram {
 	return tg
 }
 
-func (t Telegram) setWebhook(webhook string) {
+func (t Telegram) SetWebhook(webhook string) {
 	resp, err := http.PostForm(t.apiURL("setWebhook"), url.Values{"url": {webhook}})
-	if !checkerr("setWebhook", err) {
+	if !checkerr("SetWebhook", err) {
 		defer resp.Body.Close()
 		var result tg.APIResponse
 		err = json.NewDecoder(resp.Body).Decode(&result)
 		if err != nil {
-			log.Println("Could not read reply: " + err.Error())
+			log.Println("[SetWebhook] Could not read reply: " + err.Error())
 			return
 		}
 		if result.Ok {
 			log.Println("Webhook successfully set!")
 		} else {
-			log.Printf("Error setting webhook (errcode %d): %s\n", *(result.ErrCode), *(result.Description))
+			log.Printf("[SetWebhook] Error setting webhook (errcode %d): %s\n", *(result.ErrCode), *(result.Description))
 			panic(errors.New("Cannot set webhook"))
 		}
 	}
+}
+
+func (t Telegram) SendTextMessage(data tg.ClientTextMessageData) {
+	postdata := url.Values{
+		"chat_id":    {strconv.Itoa(data.ChatID)},
+		"text":       {data.Text},
+		"parse_mode": {"HTML"},
+	}
+	if data.ReplyID != nil {
+		postdata["reply_to_message_id"] = []string{strconv.Itoa(*(data.ReplyID))}
+	}
+
+	_, err := http.PostForm(t.apiURL("sendMessage"), postdata)
+	checkerr("SendTextMessage", err)
 }
 
 func (t Telegram) apiURL(method string) string {
