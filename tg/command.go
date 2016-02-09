@@ -3,14 +3,14 @@ package tg
 type ClientCommandType uint
 
 const (
-	CmdSendMessage ClientCommandType = 1
+	CmdSendTextMessage ClientCommandType = 1
 )
 
-type ClientCommandMessageData struct {
-	MessageText string
+type ClientTextMessageData struct {
+	Text string
 }
 
 type ClientCommand struct {
-	Type        ClientCommandType
-	MessageData *ClientCommandMessageData
+	Type            ClientCommandType
+	TextMessageData *ClientTextMessageData
 }

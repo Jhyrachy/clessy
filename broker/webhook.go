@@ -1,26 +1,17 @@
 package main
 
 import (
-	"io"
-	"log"
+	"io/ioutil"
 	"net/http"
-	"os"
 )
 
 func webhook(rw http.ResponseWriter, req *http.Request) {
-	log.Println("Received request! Details follow:")
+	// Read entire request and broadcast to everyone
+	data, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		return
+	}
 	defer req.Body.Close()
-	/*
-		var update tg.APIUpdate
 
-		err := json.NewDecoder(req.Body).Decode(&update)
-		if err != nil {
-			log.Println("ERR: Not JSON!")
-			return
-		}
-
-		jenc, _ := json.Marshal(update)
-		log.Println(jenc)
-	*/
-	io.Copy(os.Stdout, req.Body)
+	broadcast(string(data))
 }
