@@ -38,5 +38,5 @@ func (b *Broker) SendTextMessage(chat *APIChat, text string) {
 	if err != nil {
 		log.Printf("[SendTextMessage] JSON Encode error: %s\n", err.Error())
 	}
-	fmt.Fprintln(data)
+	fmt.Fprintln(b.Socket, data)
 }
