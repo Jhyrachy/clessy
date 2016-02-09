@@ -41,7 +41,7 @@ func handleClient(c net.Conn) {
 		var cmd tg.ClientCommand
 		err = json.Unmarshal(bytes, &cmd)
 		if err != nil {
-			log.Printf("Can't parse JSON: %s\r\n", err.Error())
+			log.Printf("[handleClient] Can't parse JSON: %s\r\n", err.Error())
 			continue
 		}
 		executeClientCommand(cmd)

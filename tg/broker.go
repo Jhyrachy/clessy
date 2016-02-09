@@ -34,9 +34,9 @@ func (b *Broker) SendTextMessage(chat *APIChat, text string) {
 		},
 	}
 	// Encode command and send to broker
-	err := json.NewEncoder(b.Socket).Encode(&cmd)
+	data, err := json.Marshal(cmd)
 	if err != nil {
 		log.Printf("[SendTextMessage] JSON Encode error: %s\n", err.Error())
 	}
-	fmt.Fprintf(b.Socket, "\n")
+	fmt.Fprintln(data)
 }

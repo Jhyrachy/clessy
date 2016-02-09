@@ -1,17 +1,29 @@
 package main
 
 import (
-	"io/ioutil"
+	"encoding/json"
+	"log"
 	"net/http"
+
+	"../tg"
 )
 
 func webhook(rw http.ResponseWriter, req *http.Request) {
-	// Read entire request and broadcast to everyone
-	data, err := ioutil.ReadAll(req.Body)
+	defer req.Body.Close()
+
+	// Re-encode request to ensure conformity
+	var update tg.APIUpdate
+	err := json.NewDecoder(req.Body).Decode(&update)
 	if err != nil {
+		log.Println("[webhook] Received incorrect request: " + err.Error())
 		return
 	}
-	defer req.Body.Close()
+
+	data, err := json.Marshal(update)
+	if err != nil {
+		log.Println("[webhook] Cannot re-encode json (??) : " + err.Error())
+		return
+	}
 
 	broadcast(string(data))
 }
