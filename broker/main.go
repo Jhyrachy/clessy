@@ -41,7 +41,7 @@ func main() {
 	// Setup webhook handler
 	go func() {
 		log.Println("Starting webserver..")
-		http.HandleFunc(config.Token, webhook)
+		http.HandleFunc(config.WebhookURL, webhook)
 		err := http.ListenAndServe(config.BindServer, nil)
 		assert(err)
 	}()
