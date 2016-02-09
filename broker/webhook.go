@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"../tg"
+	"github.com/hamcha/clessy/tg"
 )
 
 func webhook(rw http.ResponseWriter, req *http.Request) {

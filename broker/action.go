@@ -1,7 +1,7 @@
 package main
 
 import (
-	"../tg"
+	"github.com/hamcha/clessy/tg"
 )
 
 func executeClientCommand(action tg.ClientCommand) {

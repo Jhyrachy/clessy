@@ -3,7 +3,7 @@ package main
 import (
 	"math/rand"
 
-	"../tg"
+	"github.com/hamcha/clessy/tg"
 )
 
 var actions []string = []string{

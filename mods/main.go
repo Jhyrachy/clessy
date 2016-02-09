@@ -4,7 +4,7 @@ import (
 	"flag"
 	"strings"
 
-	"../tg"
+	"github.com/hamcha/clessy/tg"
 )
 
 func dispatch(broker *tg.Broker, update tg.APIMessage) {

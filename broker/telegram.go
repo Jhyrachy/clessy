@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strconv"
 
-	"../tg"
+	"github.com/hamcha/clessy/tg"
 )
 
 const APIEndpoint = "https://api.telegram.org/"
