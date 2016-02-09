@@ -27,7 +27,8 @@ func CreateBrokerClient(brokerAddr string, updateFn UpdateHandler) error {
 		err = json.Unmarshal(bytes, &update)
 		if err != nil {
 			log.Printf("[tg - CreateBrokerClient] ERROR reading JSON: %s\r\n", err.Error())
-			log.Println(string(bytes))
+			log.Printf("%s\n", string(bytes))
+			continue
 		}
 
 		// Dispatch to UpdateHandler
