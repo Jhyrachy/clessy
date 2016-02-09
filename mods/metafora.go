@@ -24,12 +24,10 @@ var objects []string = []string{
 }
 
 func metafora(broker *tg.Broker, update tg.APIMessage) {
-	if update.Text != nil {
-		if *(update.Text) == "/metafora" {
-			n := rand.Intn(len(actions))
-			m := rand.Intn(len(objects))
-			broker.SendTextMessage(update.Chat, actions[n]+" "+objects[m], nil)
-			return
-		}
+	if isCommand(update, "metafora") {
+		n := rand.Intn(len(actions))
+		m := rand.Intn(len(objects))
+		broker.SendTextMessage(update.Chat, actions[n]+" "+objects[m], nil)
+		return
 	}
 }
