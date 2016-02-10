@@ -60,7 +60,7 @@ func removeCon(c net.Conn) {
 
 func broadcast(message string) {
 	for _, c := range clients {
-		_, err := fmt.Fprintf(c, message+"\r\n")
+		_, err := fmt.Fprintln(c, message)
 		if err != nil {
 			removeCon(c)
 		}
