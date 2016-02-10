@@ -1,5 +1,8 @@
 all: clessy-broker clessy-mods clessy-stats
 
+deps:
+	go get github.com/boltdb/bolt/...
+
 install-tg:
 	go install github.com/hamcha/clessy/tg
 
