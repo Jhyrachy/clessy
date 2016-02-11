@@ -18,7 +18,7 @@ func getNick(apiuser tg.APIUser) {
 
 	users[apiuser.Username] = apiuser.FirstName
 	if apiuser.LastName != "" {
-		users[apiuser.Username] += apiuser.LastName
+		users[apiuser.Username] += " " + apiuser.LastName
 	}
 
 	err := db.Update(func(tx *bolt.Tx) error {
