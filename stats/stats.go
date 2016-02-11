@@ -344,7 +344,7 @@ func updateStats(message tg.APIMessage) {
 		}
 
 		b = tx.Bucket([]byte("weekday"))
-		err = b.Put([]byte{byte(wday)}, PutUint(stats.ByHour[wday]))
+		err = b.Put([]byte{byte(wday)}, PutUint(stats.ByWeekday[wday]))
 		if err != nil {
 			return err
 		}
