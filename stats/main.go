@@ -27,6 +27,7 @@ func process(broker *tg.Broker, update tg.APIMessage) {
 
 func main() {
 	brokerAddr := flag.String("broker", "localhost:7314", "Broker address:port")
+	webBind := flag.String("webserver", "localhost:7315", "Address to bind webserver to")
 	boltdbFile := flag.String("boltdb", "stats.db", "BoltDB database file")
 	chatID = flag.Int("chatid", -14625256, "Telegram Chat ID to count stats for")
 	flag.Parse()
@@ -38,6 +39,8 @@ func main() {
 
 	loadUsers()
 	loadStats()
+
+	go startWebServer(*webBind)
 
 	err = tg.CreateBrokerClient(*brokerAddr, process)
 	assert(err)
