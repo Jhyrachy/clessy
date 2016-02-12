@@ -24,19 +24,15 @@ const (
 )
 
 type Stats struct {
-	ByUserCount    map[string]uint64
-	ByUserAvgLen   map[string]uint64
-	ByUserAvgCount map[string]uint64
-	ByWeekday      [7]uint64
-	ByHour         [24]uint64
-	ByType         [MessageTypeMax]uint64
-	TodayDate      time.Time
-	Today          uint64
-	TotalCount     uint64
-	TotalTxtCount  uint64
-	TotalAvgLength uint64
-	Replies        uint64
-	Forward        uint64
+	ByUserCount map[string]uint64
+	ByWeekday   [7]uint64
+	ByHour      [24]uint64
+	ByType      [MessageTypeMax]uint64
+	TodayDate   time.Time
+	Today       uint64
+	TotalCount  uint64
+	Replies     uint64
+	Forward     uint64
 }
 
 var stats Stats
@@ -73,22 +69,13 @@ func loadStats() {
 		}
 
 		// Load total messages counter
-		bval := b.Get([]byte("count"))
-		stats.TotalCount = MakeUint(bval, "global", "count")
-
-		bval = b.Get([]byte("avg"))
-		stats.TotalAvgLength = MakeUint(bval, "global", "avg")
-
-		bval = b.Get([]byte("avgcount"))
-		stats.TotalTxtCount = MakeUint(bval, "global", "avgcount")
+		stats.TotalCount = MakeUint(b.Get([]byte("count")), "global", "count")
 
 		// Load total replies counter
-		bval = b.Get([]byte("replies"))
-		stats.Replies = MakeUint(bval, "global", "replies")
+		stats.Replies = MakeUint(b.Get([]byte("replies")), "global", "replies")
 
 		// Load total replies counter
-		bval = b.Get([]byte("forward"))
-		stats.Forward = MakeUint(bval, "global", "forward")
+		stats.Forward = MakeUint(b.Get([]byte("forward")), "global", "forward")
 
 		// Load hour counters
 		b, err = tx.CreateBucketIfNotExists([]byte("hour"))
@@ -97,8 +84,7 @@ func loadStats() {
 		}
 
 		for i := 0; i < 24; i++ {
-			bval = b.Get([]byte{byte(i)})
-			stats.ByHour[i] = MakeUint(bval, "hour", strconv.Itoa(i))
+			stats.ByHour[i] = MakeUint(b.Get([]byte{byte(i)}), "hour", strconv.Itoa(i))
 		}
 
 		// Load weekday counters
@@ -108,8 +94,7 @@ func loadStats() {
 		}
 
 		for i := 0; i < 7; i++ {
-			bval = b.Get([]byte{byte(i)})
-			stats.ByWeekday[i] = MakeUint(bval, "weekday", strconv.Itoa(i))
+			stats.ByWeekday[i] = MakeUint(b.Get([]byte{byte(i)}), "weekday", strconv.Itoa(i))
 		}
 
 		// Load today's message counter, if possible
@@ -119,8 +104,7 @@ func loadStats() {
 		}
 
 		todayKey := stats.TodayDate.Format("2006-1-2")
-		bval = b.Get([]byte(todayKey))
-		stats.Today = MakeUint(bval, "date", todayKey)
+		stats.Today = MakeUint(b.Get([]byte(todayKey)), "date", todayKey)
 
 		// Load user counters
 		stats.ByUserCount = make(map[string]uint64)
@@ -133,34 +117,13 @@ func loadStats() {
 			return nil
 		})
 
-		stats.ByUserAvgLen = make(map[string]uint64)
-		b, err = tx.CreateBucketIfNotExists([]byte("users-avg"))
-		if err != nil {
-			return err
-		}
-		b.ForEach(func(user, messages []byte) error {
-			stats.ByUserAvgLen[string(user)] = MakeUint(messages, "users-avg", string(user))
-			return nil
-		})
-
-		stats.ByUserAvgCount = make(map[string]uint64)
-		b, err = tx.CreateBucketIfNotExists([]byte("users-avgcount"))
-		if err != nil {
-			return err
-		}
-		b.ForEach(func(user, messages []byte) error {
-			stats.ByUserAvgCount[string(user)] = MakeUint(messages, "users-avgcount", string(user))
-			return nil
-		})
-
 		// Load type counters
 		b, err = tx.CreateBucketIfNotExists([]byte("types"))
 		if err != nil {
 			return err
 		}
 		for i := 0; i < MessageTypeMax; i++ {
-			bval = b.Get([]byte{byte(i)})
-			stats.ByType[i] = MakeUint(bval, "types", strconv.Itoa(i))
+			stats.ByType[i] = MakeUint(b.Get([]byte{byte(i)}), "types", strconv.Itoa(i))
 		}
 
 		return nil
@@ -171,8 +134,7 @@ func loadStats() {
 func updateDate() {
 	err := db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("date"))
-		todayKey := stats.TodayDate.Format("2006-1-2")
-		err := b.Put([]byte(todayKey), PutUint(stats.Today))
+		err := b.Put([]byte(stats.TodayDate.Format("2006-1-2")), PutUint(stats.Today))
 		if err != nil {
 			return err
 		}
@@ -195,7 +157,6 @@ func updateStats(message tg.APIMessage) {
 	//
 
 	// DB Update flags
-	updatemean := false
 	updatetype := 0
 	updatereplies := false
 	updateforward := false
@@ -227,25 +188,6 @@ func updateStats(message tg.APIMessage) {
 	// Text message
 	if message.Text != nil {
 		stats.ByType[MessageTypeText]++
-
-		// Update total and individual average
-		msglen := uint64(len(*(message.Text)))
-		if stats.TotalTxtCount > 0 {
-			stats.TotalAvgLength = updateMean(stats.TotalAvgLength, stats.TotalTxtCount, msglen)
-			stats.TotalTxtCount++
-		} else {
-			stats.TotalAvgLength = msglen
-			stats.TotalTxtCount = 1
-		}
-		val, exists = stats.ByUserAvgCount[username]
-		if exists {
-			stats.ByUserAvgLen[username] = updateMean(stats.ByUserAvgLen[username], val, msglen)
-			stats.ByUserAvgCount[username]++
-		} else {
-			stats.ByUserAvgLen[username] = msglen
-			stats.ByUserAvgCount[username] = 1
-		}
-		updatemean = true
 		updatetype = MessageTypeText
 	}
 	// Audio message
@@ -312,17 +254,6 @@ func updateStats(message tg.APIMessage) {
 			return err
 		}
 
-		if updatemean {
-			err = b.Put([]byte("avg"), PutUint(stats.TotalAvgLength))
-			if err != nil {
-				return err
-			}
-			err = b.Put([]byte("avgcount"), PutUint(stats.TotalTxtCount))
-			if err != nil {
-				return err
-			}
-		}
-
 		if updatereplies {
 			err = b.Put([]byte("replies"), PutUint(stats.Replies))
 			if err != nil {
@@ -361,19 +292,6 @@ func updateStats(message tg.APIMessage) {
 		err = b.Put([]byte(username), PutUint(stats.ByUserCount[username]))
 		if err != nil {
 			return err
-		}
-
-		if updatemean {
-			b = tx.Bucket([]byte("users-avg"))
-			err = b.Put([]byte(username), PutUint(stats.ByUserAvgLen[username]))
-			if err != nil {
-				return err
-			}
-			b = tx.Bucket([]byte("users-avgcount"))
-			err = b.Put([]byte(username), PutUint(stats.ByUserAvgCount[username]))
-			if err != nil {
-				return err
-			}
 		}
 
 		// Update type counter

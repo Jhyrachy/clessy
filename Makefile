@@ -15,5 +15,8 @@ clessy-mods: install-tg
 clessy-stats: install-tg
 	go build -o clessy-stats github.com/hamcha/clessy/stats
 
+clessy-stats-import: install-tg
+	go build -o clessy-stats-import github.com/hamcha/clessy/stats-import
+
 clean:
 	rm -f clessy-broker clessy-mods clessy-stats
