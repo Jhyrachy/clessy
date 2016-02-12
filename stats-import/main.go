@@ -14,7 +14,8 @@ import (
 )
 
 type User struct {
-	Username string `json:"username"`
+	Username  string `json:"username"`
+	FirstName string `json:"first_name"`
 }
 
 type Message struct {
@@ -34,6 +35,7 @@ type Stats struct {
 	ByDate    map[string]uint64
 	Replies   uint64
 	Forward   uint64
+	Username  map[string]string
 }
 
 func assert(err error) {
@@ -108,6 +110,8 @@ func processMessage(msg Message, data *Stats) {
 		val = 0
 	}
 	data.ByDate[datekey] = val + 1
+
+	data.Username[msg.From.Username] = msg.From.FirstName
 }
 
 func MakeUint(bval []byte, bucketName string, key string) uint64 {
@@ -213,10 +217,33 @@ func update(db *bolt.DB, data Stats) error {
 		}
 
 		for user, count := range data.ByUser {
+			// Why do I even need this?
+			if len(user) < 1 {
+				continue
+			}
 			count += MakeUint(b.Get([]byte(user)), "users-count", user)
 			err = b.Put([]byte(user), PutUint(count))
 			if err != nil {
 				return err
+			}
+		}
+
+		// Add to username table exclusively if not already present
+		b, err = tx.CreateBucketIfNotExists([]byte("usernames"))
+		if err != nil {
+			return err
+		}
+		for user, first := range data.Username {
+			// Why do I even need this? (2)
+			if len(user) < 1 {
+				continue
+			}
+			val := b.Get([]byte(user))
+			if val == nil {
+				err = b.Put([]byte(user), []byte(first))
+				if err != nil {
+					return err
+				}
 			}
 		}
 
