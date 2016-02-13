@@ -100,9 +100,9 @@
 	function toArray(o){var a=[];for(k in o){a.push([k,o[k]]);}return a}
 	function sortMessages(a,b){return b[1]-a[1]}
 	function mkRow(c){var a="createElement",r=document[a]("tr");c.map(function(C){var A=document[a]("td");A.innerHTML=C;r.appendChild(A)});return r;}
-	function values(x){var ar=[];for(i in x){ar.push(x[i])}return ar}
 	months=["Gen","Feb","Mar","Apr","Mag","Giu","Lug","Ago","Set","Ott","Nov","Dic"];
 	function dayfmt(d){var p=d.split("-");return[p[2],months[parseInt(p[1])-1],p[0]].join(" ")}
+	function reorder(d){var k=[],K=[],t={},v=[],i=0,p;for(x in d){p=x.split("-");p=parseInt(p[0])*1e4+parseInt(p[1])*1e2+parseInt(p[2]);t[p]=x;k.push(p);}k.sort();for (;i<k.length;i++){K.push(t[k[i]]);v.push(d[t[k[i]]]);}return[k,K,v]}
 
 	// Load from backend
 	req([
@@ -181,10 +181,13 @@
 		// Remove bogus data
 		delete stats.ByDay["1970-1-1"]
 
+		// Reorder rest
+		byday = reorder(stats.ByDay);
+
 		var daychart = new Chart(dayctx, {
 			type: 'line',
 			data: {
-				labels: Object.keys(stats.ByDay).map(dayfmt),
+				labels: byday[1].map(dayfmt),
 				datasets: [{
 					label: "Messaggi",
 					fill: true,
@@ -207,7 +210,7 @@
 					strokeColor: "rgba(151,187,205,0.8)",
 					highlightFill: "rgba(151,187,205,0.75)",
 					highlightStroke: "rgba(151,187,205,1)",
-					data: values(stats.ByDay)
+					data: byday[2]
 				}]
 			},
 			options: {
