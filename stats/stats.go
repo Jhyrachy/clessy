@@ -322,6 +322,12 @@ func processWords(message tg.APIMessage) {
 				continue
 			}
 
+			word = strings.ToLower(word)
+
+			if strings.HasPrefix(word, "http") {
+				continue
+			}
+
 			word = strings.Trim(word, " ?!.,:;/-_()[]{}'\"+=*^\n")
 			count, ok := words[word]
 			if !ok {
