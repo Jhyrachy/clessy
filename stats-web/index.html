@@ -42,9 +42,9 @@
 		#totalmsg { text-align: center; padding-bottom: 1rem; }
 		#usermsg i { font-size: 0.8rem; font-style: normal; }
 		#usermsg tr:nth-child(even) { background-color: #fafafa; }
-		#usermsg td { text-align: center; padding: 0.3rem 0; }
+		#usermsg td { text-align: center; padding: 0.3rem 0; word-break: break-word; }
 		#usermsg th { padding: 0.3rem 0.5rem; }
-		#usermsg td:first-child { text-align: left; padding: 0.3rem 0.6rem; }
+		#usermsg td:first-child, #usermsg td:nth-child(4) { text-align: left; padding: 0.3rem 0.6rem; }
 		canvas { width: 100%; }
 	</style>
 </head>
@@ -87,9 +87,10 @@
 				</div>
 				<table id="usermsg">
 					<tr>
-						<th width="60%">Nickname</th>
+						<th width="40%">Nickname</th>
 						<th width="20%">Messaggi totali</th>
 						<th width="20%">% dei messaggi</th>
+						<th width="40%">Mamo</th>
 					</tr>
 				</table>
 			</article>
@@ -108,8 +109,9 @@
 	req([
 		Qapi("https://stats.crunchy.rocks/stats"),
 		Qapi("https://stats.crunchy.rocks/users"),
+		Qapi("https://stats.crunchy.rocks/words"),
 		Qready
-	], function(stats, users) {
+	], function(stats, users, words) {
 		var font = "'Source Sans Pro', sans-serif";
 		Chart.defaults.global.defaultFontFamily = font;
 		Chart.defaults.global.legend.labels.fontFamily = font;
@@ -223,9 +225,25 @@
 		document.getElementById("totalcount").innerHTML = stats.TotalCount;
 
 		/* User stats */
-		function percent(a){return Math.round(a/stats.TotalCount*1e4)/1e2;}
+
+		// Count words
+		var userFreq = {};
+		for (w in words) {
+			for (user in words[w]) {
+				if (!userFreq[user]) {
+					userFreq[user] = [];
+				}
+				userFreq[user].push([w, words[w][user]]);
+			}
+		}
+		for (user in userFreq) {
+			userFreq[user].sort();
+		}
+
+		function formatwords(n){return userFreq[n]?userFreq[n].slice(0,3).map(function(i){return i[0]}).join(", "):""}
+		function percent(a){return Math.round(a/stats.TotalCount*1e4)/1e2}
 		function nick(a){return users[a]?users[a]+" <i>("+a+")</i>":a}
-		function enrich(a){return [nick(a[0]), a[1], percent(a[1])]}
+		function enrich(a){return [nick(a[0]), a[1], percent(a[1]), formatwords(a[0])]}
 		function append(a){usertable.appendChild(a)}
 		var userlist = toArray(stats.ByUserCount).sort(sortMessages);
 		var usertable = document.getElementById("usermsg");
