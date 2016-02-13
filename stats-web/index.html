@@ -10,7 +10,7 @@
 	function Qapi(u){return p(u).then}
 	function Qready(cb){window.onload=cb}
 	</script>
-	<script src="Chart.js"></script>
+	<script src="Chart.bundle.min.js"></script>
 	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes, target-densitydpi=device-dpi, minimal-ui" />
 
 	<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600' rel='stylesheet' type='text/css'>
@@ -45,30 +45,37 @@
 		#usermsg td { text-align: center; padding: 0.3rem 0; }
 		#usermsg th { padding: 0.3rem 0.5rem; }
 		#usermsg td:first-child { text-align: left; padding: 0.3rem 0.6rem; }
-		canvas {
-		}
+		canvas { width: 100%; }
 	</style>
 </head>
 <body>
 	<main>
 		<section>
-			<article>
+			<article id="typecont">
 				<header>Messaggi divisi per tipo</header>
 				<center>
-					<canvas id="chart-type" height="300" style="max-width: 320px;"></canvas>
+					<canvas id="chart-type" height="300"></canvas>
 					<div id="type-legend"></div>
 				</center>
 			</article>
-			<article>
+			<article id="wdaycont">
 				<header>Attivit&agrave; per giorno della settimana</header>
 				<center>
-					<canvas id="chart-wday" height="300" style="max-width: 320px;"></canvas>
+					<canvas id="chart-wday" height="300"></canvas>
 				</center>
 			</article>
-			<article>
+			<article id="hourcont">
 				<header>Attivit&agrave; per ora del giorno</header>
 				<center>
-					<canvas id="chart-hour" height="300" style="max-width: 320px;"></canvas>
+					<canvas id="chart-hour" height="300"></canvas>
+				</center>
+			</article>
+		</section>
+		<section>
+			<article id="daycont">
+				<header>Attivit&agrave; per giorno</header>
+				<center>
+					<canvas id="chart-day" height="350"></canvas>
 				</center>
 			</article>
 		</section>
@@ -93,22 +100,33 @@
 	function toArray(o){var a=[];for(k in o){a.push([k,o[k]]);}return a}
 	function sortMessages(a,b){return b[1]-a[1]}
 	function mkRow(c){var a="createElement",r=document[a]("tr");c.map(function(C){var A=document[a]("td");A.innerHTML=C;r.appendChild(A)});return r;}
+	function values(x){var ar=[];for(i in x){ar.push(x[i])}return ar}
+	months=["Gen","Feb","Mar","Apr","Mag","Giu","Lug","Ago","Set","Ott","Nov","Dic"];
+	function dayfmt(d){var p=d.split("-");return[p[2],months[parseInt(p[1])-1],p[0]].join(" ")}
 
 	// Load from backend
 	req([
-		Qapi("/stats"),
-		Qapi("/users"),
+		Qapi("https://stats.crunchy.rocks/stats"),
+		Qapi("https://stats.crunchy.rocks/users"),
 		Qready
 	], function(stats, users) {
 		var font = "'Source Sans Pro', sans-serif";
 		Chart.defaults.global.defaultFontFamily = font;
 		Chart.defaults.global.legend.labels.fontFamily = font;
 		Chart.defaults.global.title.fontFamily = font;
+		Chart.defaults.global.responsive = false;
+		Chart.defaults.global.maintainAspectRatio = false;
+		Chart.defaults.scale.ticks.fontFamily = font;
 
 		/* Get chart canvas elements */
-		var typectx = document.getElementById("chart-type").getContext("2d");
-		var wdayctx = document.getElementById("chart-wday").getContext("2d");
-		var hourctx = document.getElementById("chart-hour").getContext("2d");
+		var typecvs = document.getElementById("chart-type");
+		var typectx = typecvs.getContext("2d");
+		var wdaycvs = document.getElementById("chart-wday");
+		var wdayctx = wdaycvs.getContext("2d");
+		var hourcvs = document.getElementById("chart-hour");
+		var hourctx = hourcvs.getContext("2d");
+		var daycvs = document.getElementById("chart-day");
+		var dayctx = daycvs.getContext("2d");
 
 		/* Create charts */
 		var typechart = new Chart(typectx, {
@@ -138,11 +156,7 @@
 				}]
 			},
 			options: {
-				legend: { display: false },
-				scales: {
-					xAxes: [{ ticks: { fontFamily: font } }],
-					yAxes: [{ ticks: { fontFamily: font } }],
-				}
+				legend: { display: false }
 			}
 		});
 
@@ -160,13 +174,47 @@
 				}]
 			},
 			options: {
-				legend: { display: false },
-				scales: {
-					xAxes: [{ ticks: { fontFamily: font } }],
-					yAxes: [{ ticks: { fontFamily: font } }],
-				}
+				legend: { display: false }
 			}
 		});
+
+		// Remove bogus data
+		delete stats.ByDay["1970-1-1"]
+
+		var daychart = new Chart(dayctx, {
+			type: 'line',
+			data: {
+				labels: Object.keys(stats.ByDay).map(dayfmt),
+				datasets: [{
+					label: "Messaggi",
+					fill: true,
+					backgroundColor: "rgba(220,220,220,0.2)",
+					borderColor: "rgba(220,220,220,1)",
+					borderCapStyle: 'cloud',
+					borderDash: [],
+					borderDashOffset: 0.0,
+					borderJoinStyle: 'miter',
+					pointBorderColor: "rgba(220,220,220,1)",
+					pointBackgroundColor: "#fff",
+					pointBackgroundColor: "#fff",
+					pointBorderWidth: 1,
+					pointHoverRadius: 5,
+					pointHoverBackgroundColor: "rgba(220,220,220,1)",
+					pointHoverBorderColor: "rgba(220,220,220,1)",
+					pointHoverBorderWidth: 2,
+					tension: 0.1,
+					fillColor: "rgba(151,187,205,0.5)",
+					strokeColor: "rgba(151,187,205,0.8)",
+					highlightFill: "rgba(151,187,205,0.75)",
+					highlightStroke: "rgba(151,187,205,1)",
+					data: values(stats.ByDay)
+				}]
+			},
+			options: {
+				legend: { display: false }
+			}
+		});
+
 
 		/* Total stats */
 		document.getElementById("totalcount").innerHTML = stats.TotalCount;
@@ -179,6 +227,27 @@
 		var userlist = toArray(stats.ByUserCount).sort(sortMessages);
 		var usertable = document.getElementById("usermsg");
 		userlist.map(enrich).map(mkRow).map(append);
+
+		/* Hand-made responsiveness */
+		margin = 100;
+		window.onresize = function() {
+			typecvs.width = typecvs.clientWidth;
+			typecvs.height = 300;
+			typechart.resize();
+
+			wdaycvs.width = wdaycvs.clientWidth;
+			wdaycvs.height = 300;
+			wdaychart.resize();
+
+			hourcvs.width = hourcvs.clientWidth;
+			hourcvs.height = 300;
+			hourchart.resize();
+
+			daycvs.width = daycvs.clientWidth;
+			daycvs.height = 350;
+			daychart.resize();
+		}
+		window.onresize();
 	});
 	</script>
 </body>
