@@ -318,6 +318,7 @@ func processWords(message tg.APIMessage) {
 	err := db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("words"))
 		for _, word := range wordList {
+			word = strings.Trim(word, " ?!.,:;/-_()[]{}'\"+=*^\n")
 			count, ok := words[word]
 			if !ok {
 				count = make(UserCount)
