@@ -338,6 +338,7 @@ func processWords(message tg.APIMessage) {
 				val = 0
 			}
 			count[message.User.Username] = val + 1
+			words[word] = count
 
 			j, err := json.Marshal(count)
 			if err != nil {
