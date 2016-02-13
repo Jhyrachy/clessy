@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/binary"
+	"encoding/json"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/boltdb/bolt"
@@ -35,6 +37,10 @@ type Stats struct {
 }
 
 var stats Stats
+
+type UserCount map[string]uint64
+
+var words map[string]UserCount
 
 func MakeUint(bval []byte, bucketName string, key string) uint64 {
 	if bval != nil {
@@ -125,6 +131,22 @@ func loadStats() {
 			stats.ByType[i] = MakeUint(b.Get([]byte{byte(i)}), "types", strconv.Itoa(i))
 		}
 
+		// Load dictionary
+		b, err = tx.CreateBucketIfNotExists([]byte("words"))
+		if err != nil {
+			return err
+		}
+		words = make(map[string]UserCount)
+		b.ForEach(func(word, ucount []byte) error {
+			var val UserCount
+			err := json.Unmarshal(ucount, &val)
+			if err != nil {
+				return err
+			}
+			words[string(word)] = val
+			return nil
+		})
+
 		return nil
 	})
 	assert(err)
@@ -188,6 +210,9 @@ func updateStats(message tg.APIMessage) {
 	if message.Text != nil {
 		stats.ByType[MessageTypeText]++
 		updatetype = MessageTypeText
+
+		// Process words
+		processWords(message)
 	}
 	// Audio message
 	if message.Audio != nil {
@@ -281,5 +306,45 @@ func updateStats(message tg.APIMessage) {
 	})
 	if err != nil {
 		log.Println("[updateStats] Got error while updating DB: " + err.Error())
+	}
+}
+
+func processWords(message tg.APIMessage) {
+	if len(*(message).Text) < 3 {
+		return
+	}
+
+	wordList := strings.Split(*(message.Text), " ")
+	err := db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("words"))
+		for _, word := range wordList {
+			if len(word) < 3 {
+				continue
+			}
+
+			data := b.Get([]byte(word))
+
+			var count UserCount
+			err := json.Unmarshal(data, &count)
+			if err != nil {
+				return err
+			}
+
+			val, ok := count[message.User.Username]
+			if !ok {
+				val = 0
+			}
+			count[message.User.Username] = val + 1
+
+			j, err := json.Marshal(count)
+			if err != nil {
+				return err
+			}
+			b.Put([]byte(word), j)
+		}
+		return nil
+	})
+	if err != nil {
+		log.Println("[processWords] Error encountered: " + err.Error())
 	}
 }
