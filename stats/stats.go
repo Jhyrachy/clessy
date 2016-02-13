@@ -99,6 +99,7 @@ func loadStats() {
 		}
 
 		// Load day counters
+		stats.ByDay = make(map[string]uint64)
 		b, err = tx.CreateBucketIfNotExists([]byte("date"))
 		if err != nil {
 			return err
