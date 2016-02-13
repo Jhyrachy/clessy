@@ -20,8 +20,16 @@ func webUsers(rw http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func webWords(rw http.ResponseWriter, req *http.Request) {
+	err := json.NewEncoder(rw).Encode(words)
+	if err != nil {
+		log.Println("[webWords] JSON Encoding error: " + err.Error())
+	}
+}
+
 func startWebServer(bindAddr string) {
 	http.HandleFunc("/stats", webStats)
-	http.HandleFunc("/users", webUsers)
+	http.HandleFunc("/users", webUserNames)
+	http.HandleFunc("/words", webUserWords)
 	http.ListenAndServe(bindAddr, nil)
 }
