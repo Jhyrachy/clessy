@@ -29,7 +29,7 @@ func webWords(rw http.ResponseWriter, req *http.Request) {
 
 func startWebServer(bindAddr string) {
 	http.HandleFunc("/stats", webStats)
-	http.HandleFunc("/users", webUserNames)
-	http.HandleFunc("/words", webUserWords)
+	http.HandleFunc("/users", webUsers)
+	http.HandleFunc("/words", webWords)
 	http.ListenAndServe(bindAddr, nil)
 }
