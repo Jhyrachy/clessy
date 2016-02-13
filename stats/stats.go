@@ -32,8 +32,6 @@ type Stats struct {
 	TodayDate   time.Time
 	Today       uint64
 	TotalCount  uint64
-	Replies     uint64
-	Forward     uint64
 }
 
 var stats Stats
@@ -71,12 +69,6 @@ func loadStats() {
 
 		// Load total messages counter
 		stats.TotalCount = MakeUint(b.Get([]byte("count")), "global", "count")
-
-		// Load total replies counter
-		stats.Replies = MakeUint(b.Get([]byte("replies")), "global", "replies")
-
-		// Load total replies counter
-		stats.Forward = MakeUint(b.Get([]byte("forward")), "global", "forward")
 
 		// Load hour counters
 		b, err = tx.CreateBucketIfNotExists([]byte("hour"))
@@ -167,8 +159,6 @@ func updateStats(message tg.APIMessage) {
 
 	// DB Update flags
 	updatetype := 0
-	updatereplies := false
-	updateforward := false
 
 	// Update total count
 	stats.TotalCount++
@@ -239,16 +229,6 @@ func updateStats(message tg.APIMessage) {
 		stats.ByType[MessageTypeDocument]++
 		updatetype = MessageTypeDocument
 	}
-	// Reply
-	if message.ReplyTo != nil {
-		stats.Replies++
-		updatereplies = true
-	}
-	// Forwarded message
-	if message.FwdUser != nil {
-		stats.Forward++
-		updateforward = true
-	}
 
 	//
 	// DB Update
@@ -261,19 +241,6 @@ func updateStats(message tg.APIMessage) {
 		err := b.Put([]byte("count"), PutUint(stats.TotalCount))
 		if err != nil {
 			return err
-		}
-
-		if updatereplies {
-			err = b.Put([]byte("replies"), PutUint(stats.Replies))
-			if err != nil {
-				return err
-			}
-		}
-		if updateforward {
-			err = b.Put([]byte("forward"), PutUint(stats.Forward))
-			if err != nil {
-				return err
-			}
 		}
 
 		// Update time counters
