@@ -28,6 +28,7 @@ type Stats struct {
 	ByWeekday   [7]uint64
 	ByHour      [24]uint64
 	ByType      [MessageTypeMax]uint64
+	ByDay       map[string]uint64
 	TodayDate   time.Time
 	Today       uint64
 	TotalCount  uint64
@@ -97,11 +98,16 @@ func loadStats() {
 			stats.ByWeekday[i] = MakeUint(b.Get([]byte{byte(i)}), "weekday", strconv.Itoa(i))
 		}
 
-		// Load today's message counter, if possible
+		// Load day counters
 		b, err = tx.CreateBucketIfNotExists([]byte("date"))
 		if err != nil {
 			return err
 		}
+
+		b.ForEach(func(day, messages []byte) error {
+			stats.ByDay[string(day)] = MakeUint(messages, "date", string(day))
+			return nil
+		})
 
 		todayKey := stats.TodayDate.Format("2006-1-2")
 		stats.Today = MakeUint(b.Get([]byte(todayKey)), "date", todayKey)
@@ -132,9 +138,10 @@ func loadStats() {
 }
 
 func updateDate() {
+	dateKey := stats.TodayDate.Format("2006-1-2")
 	err := db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("date"))
-		err := b.Put([]byte(stats.TodayDate.Format("2006-1-2")), PutUint(stats.Today))
+		err := b.Put([]byte(dateKey), PutUint(stats.Today))
 		if err != nil {
 			return err
 		}
@@ -143,6 +150,7 @@ func updateDate() {
 	if err != nil {
 		log.Println("[updateDate] Couldn't save last day stats: " + err.Error())
 	}
+	stats.ByDay[dateKey] = stats.Today
 	stats.TodayDate = time.Now()
 	stats.Today = 0
 }
