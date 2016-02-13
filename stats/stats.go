@@ -325,9 +325,13 @@ func processWords(message tg.APIMessage) {
 			data := b.Get([]byte(word))
 
 			var count UserCount
-			err := json.Unmarshal(data, &count)
-			if err != nil {
-				return err
+			if data == nil {
+				count = make(UserCount)
+			} else {
+				err := json.Unmarshal(data, &count)
+				if err != nil {
+					return err
+				}
 			}
 
 			val, ok := count[message.User.Username]
