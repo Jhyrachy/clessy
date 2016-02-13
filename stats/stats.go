@@ -318,22 +318,10 @@ func processWords(message tg.APIMessage) {
 	err := db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("words"))
 		for _, word := range wordList {
-			if len(word) < 3 {
-				continue
-			}
-
-			data := b.Get([]byte(word))
-
-			var count UserCount
-			if data == nil {
+			count, ok := words[word]
+			if !ok {
 				count = make(UserCount)
-			} else {
-				err := json.Unmarshal(data, &count)
-				if err != nil {
-					return err
-				}
 			}
-
 			val, ok := count[message.User.Username]
 			if !ok {
 				val = 0
