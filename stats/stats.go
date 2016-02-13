@@ -319,7 +319,7 @@ func processWords(message tg.APIMessage) {
 		b := tx.Bucket([]byte("words"))
 		for _, word := range wordList {
 			if len(word) < 3 {
-				return
+				continue
 			}
 
 			word = strings.Trim(word, " ?!.,:;/-_()[]{}'\"+=*^\n")
