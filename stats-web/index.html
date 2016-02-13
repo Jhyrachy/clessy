@@ -240,7 +240,8 @@
 			userFreq[user].sort();
 		}
 
-		function formatwords(n){return userFreq[n]?userFreq[n].slice(0,3).map(function(i){return i[0]}).join(" "):""}
+		function sortwords(a,b){return a[1]-b[1]}
+		function formatwords(n){return userFreq[n]?userFreq[n].sort(sortwords).slice(0,3).map(function(i){return i[0]}).join(" "):""}
 		function percent(a){return Math.round(a/stats.TotalCount*1e4)/1e2}
 		function nick(a){return users[a]?users[a]+" <i>("+a+")</i>":a}
 		function enrich(a){return [nick(a[0]), a[1], percent(a[1]), formatwords(a[0])]}
