@@ -28,7 +28,7 @@ func webWords(rw http.ResponseWriter, req *http.Request) {
 	// Filter words under a certain usage
 	filtered := make(map[string]UserCount)
 	for word, usage := range words {
-		total := 0
+		total := uint64(0)
 		for _, count := range usage {
 			total += count
 		}
