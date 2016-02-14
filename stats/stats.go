@@ -364,6 +364,10 @@ var FILTER = []string{
 	"gente", "chi", "meno", "sempre", "pare", "bene", "devo", "vuoi", "lui", "sul",
 	"quella", "po", "vero", "quel", "anni", "tra", "euro", "senza", "cose",
 	"avere", "also", "han", "parte", "tempo", "perche", "ogni", "mia", "detto",
+	"più", "questo", "così", "si", "molto", "casa", "delle", "male", "devi", "dal",
+	"già", "può", "tuo", "qua", "ok", "c'é", "tua", "cui", "sai", "usa", "noi", "lei",
+	"you", "troppo", "forse", "fanno", "dopo", "ciao", "not", "avevo", "anzi", "caso",
+	"fosse", "stato", "siamo", "sulla", "lì", "sarà", "dalla",
 }
 
 const USAGE_THRESHOLD = 3
@@ -372,16 +376,17 @@ func filteredWords() map[string]UserCount {
 	filtered := make(map[string]UserCount)
 	for word, usage := range words {
 		// Check for too common
-		isfilter := false
-		for _, filter := range FILTER {
-			if word == filter {
-				isfilter = true
-				break
+		/*
+			isfilter := false
+			for _, filter := range FILTER {
+				if word == filter {
+					isfilter = true
+					break
+				}
 			}
-		}
-		if isfilter {
-			continue
-		}
+			if isfilter {
+				continue
+			}*/
 
 		// Check for not common enough
 		max := uint64(0)
