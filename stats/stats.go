@@ -354,48 +354,64 @@ func processWords(message tg.APIMessage) {
 }
 
 var FILTER = []string{
-	"che", "non", "per", "una", "sono", "come", "con", "anche", "piu", "tipo",
-	"perché", "era", "del", "poi", "fare", "gli", "cosa", "solo", "fatto",
-	"hai", "quello", "quando", "quindi", "ora", "sia", "roba", "mio", "son", "tutto",
-	"tutti", "uno", "the", "prima", "dire", "cosi", "cazzo", "visto", "sei",
-	"quanto", "dei", "sta", "credo", "mai", "tanto", "ancora", "nel", "sto", "pure",
-	"della", "c'è", "fai", "alla", "dai", "due", "gia", "dove", "puoi", "oddio",
-	"hanno", "no", "altro", "comunque", "magari", "gioco", "essere", "sì", "l'ho",
-	"gente", "chi", "meno", "sempre", "pare", "bene", "devo", "vuoi", "lui", "sul",
-	"quella", "po", "vero", "quel", "anni", "tra", "euro", "senza", "cose",
-	"avere", "also", "han", "parte", "tempo", "perche", "ogni", "mia", "detto",
-	"più", "questo", "così", "si", "molto", "casa", "delle", "male", "devi", "dal",
-	"già", "può", "tuo", "qua", "ok", "c'é", "tua", "cui", "sai", "usa", "noi", "lei",
-	"you", "troppo", "forse", "fanno", "dopo", "ciao", "not", "avevo", "anzi", "caso",
-	"fosse", "stato", "siamo", "sulla", "lì", "sarà", "dalla",
+	"100", "abbastanza", "abbia", "abbiamo", "adesso", "again", "agli", "ah", "alcune",
+	"alcuni", "all", "all'inizio", "alla", "alle", "allo", "allora", "almeno", "also",
+	"alto", "altra", "altre", "altri", "altrimenti", "altro", "amici", "amico", "amo",
+	"anche", "ancora", "and", "andare", "andato", "anime", "anni", "anzi", "appena", "apposta",
+	"are", "assieme", "avanti", "aver", "avere", "avete", "aveva", "avevano", "avevi", "avevo",
+	"avrebbe", "avrei", "avuto", "base", "bel", "bella", "belle", "belli", "bellissimo",
+	"bello", "ben", "bene", "benissimo", "bisogno", "bravo", "brutta", "brutto", "cambia",
+	"che", "chi", "cioe", "cioè", "ciò", "coi", "col", "com'è", "come", "con", "cos'è", "cosa",
+	"così", "cui", "dai", "dal", "dalla", "dalle", "danno", "dare", "degli", "dei", "del",
+	"della", "delle", "dello", "deve", "devi", "devo", "dove", "e", "era", "erano", "eri",
+	"ero", "fa", "fai", "fanno", "finché", "gia", "già", "giù", "gli", "hai", "han", "hanno",
+	"have", "il", "in", "io", "l'altro", "l'avevo", "l'ha", "l'hai", "l'hanno", "l'ho",
+	"la", "lei", "lui", "lì", "ma", "me", "meno", "mentre", "mia", "mie", "miei", "mio", "molti",
+	"molto", "negli", "nei", "nel", "nella", "nelle", "nello", "no", "noi", "non", "not", "nuovi",
+	"nuovo", "ok", "oltre", "oppure", "ora", "per", "perche", "perchè", "perché", "però",
+	"piu", "più", "po", "poi", "puoi", "pure", "può", "qua", "qualche", "quale", "quando",
+	"quanti", "quanto", "quasi", "quei", "quel", "quella", "quelle", "quelli", "quello",
+	"questa", "queste", "questi", "questo", "qui", "quindi", "sai", "sarei", "sarà", "se",
+	"sei", "sempre", "sennò", "senza", "si", "sia", "siamo", "siano", "siete", "son", "sono",
+	"sopra", "sta", "stai", "ste", "sti", "stiamo", "sto", "sua", "sue", "sui", "sul", "sulla",
+	"sulle", "suo", "suoi", "sì", "tanta", "tante", "tanti", "tanto", "te", "that", "the",
+	"then", "too", "tra", "troppi", "troppo", "tua", "tuo", "tuoi", "tutta", "tutte",
+	"tutti", "tutto", "un'altra", "una", "uno", "usa", "usi", "uso", "vai", "verso", "via",
+	"voglia", "voglio", "vogliono", "voi", "volete", "voleva", "volevo", "volta", "volte",
+	"vorrei", "vuoi", "vuol", "vuole", "was",
 }
 
-const USAGE_THRESHOLD = 3
+const USAGE_THRESHOLD = 10
 
 func filteredWords() map[string]UserCount {
 	filtered := make(map[string]UserCount)
 	for word, usage := range words {
 		// Check for too common
-		/*
-			isfilter := false
-			for _, filter := range FILTER {
-				if word == filter {
-					isfilter = true
-					break
-				}
-			}
-			if isfilter {
-				continue
-			}*/
 
-		// Check for not common enough
-		max := uint64(0)
-		for _, count := range usage {
-			if count > max {
-				max = count
+		isfilter := false
+		for _, filter := range FILTER {
+			if word == filter {
+				isfilter = true
+				break
 			}
 		}
-		if max < USAGE_THRESHOLD {
+		if isfilter {
+			continue
+		}
+
+		// Check for not common enough
+		good := false
+		ucount := make(UserCount)
+		for user, count := range usage {
+			if count < USAGE_THRESHOLD {
+				continue
+			}
+			if !good {
+				good = true
+			}
+			ucount[user] = count
+		}
+		if !good {
 			continue
 		}
 
