@@ -352,3 +352,49 @@ func processWords(message tg.APIMessage) {
 		log.Println("[processWords] Error encountered: " + err.Error())
 	}
 }
+
+var FILTER = []string{
+	"che", "non", "per", "una", "sono", "come", "con", "anche", "piu", "tipo",
+	"perché", "era", "del", "poi", "fare", "gli", "cosa", "solo", "fatto",
+	"hai", "quello", "quando", "quindi", "ora", "sia", "roba", "mio", "son", "tutto",
+	"tutti", "uno", "the", "prima", "dire", "cosi", "cazzo", "visto", "sei",
+	"quanto", "dei", "sta", "credo", "mai", "tanto", "ancora", "nel", "sto", "pure",
+	"della", "c'è", "fai", "alla", "dai", "due", "gia", "dove", "puoi", "oddio",
+	"hanno", "no", "altro", "comunque", "magari", "gioco", "essere", "sì", "l'ho",
+	"gente", "chi", "meno", "sempre", "pare", "bene", "devo", "vuoi", "lui", "sul",
+	"quella", "po", "vero", "quel", "anni", "tra", "euro", "senza", "cose",
+	"avere", "also", "han", "parte", "tempo", "perche", "ogni", "mia", "detto",
+}
+
+const USAGE_THRESHOLD = 3
+
+func filteredWords() map[string]UserCount {
+	filtered := make(map[string]UserCount)
+	for word, usage := range words {
+		// Check for too common
+		isfilter := false
+		for _, filter := range FILTER {
+			if word == filter {
+				isfilter = true
+				break
+			}
+		}
+		if isfilter {
+			continue
+		}
+
+		// Check for not common enough
+		max := uint64(0)
+		for _, count := range usage {
+			if count > max {
+				max = count
+			}
+		}
+		if max < USAGE_THRESHOLD {
+			continue
+		}
+
+		filtered[word] = usage
+	}
+	return filtered
+}

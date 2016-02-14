@@ -22,25 +22,9 @@ func webUsers(rw http.ResponseWriter, req *http.Request) {
 	}
 }
 
-const USAGE_THRESHOLD = 3
-
 func webWords(rw http.ResponseWriter, req *http.Request) {
-	// Filter words under a certain usage
-	filtered := make(map[string]UserCount)
-	for word, usage := range words {
-		total := uint64(0)
-		for _, count := range usage {
-			total += count
-		}
-
-		if total < USAGE_THRESHOLD {
-			continue
-		}
-		filtered[word] = usage
-	}
-
 	rw.Header().Set("Content-Type", "application/json")
-	err := json.NewEncoder(rw).Encode(filtered)
+	err := json.NewEncoder(rw).Encode(filteredWords())
 	if err != nil {
 		log.Println("[webWords] JSON Encoding error: " + err.Error())
 	}
