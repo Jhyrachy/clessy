@@ -58,6 +58,7 @@ func main() {
 	data.ByUser = make(map[string]uint64)
 	data.ByDate = make(map[string]uint64)
 	data.Username = make(map[string]string)
+	data.Words = make(map[string]UserCount)
 
 	scanner := bufio.NewScanner(file)
 	lines := 0
