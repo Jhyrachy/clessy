@@ -2,6 +2,7 @@ all: clessy-broker clessy-mods clessy-stats
 
 deps:
 	go get github.com/boltdb/bolt/...
+	go get github.com/golang/freetype
 
 install-tg:
 	go install github.com/hamcha/clessy/tg
