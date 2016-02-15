@@ -7,8 +7,13 @@ import (
 	"github.com/hamcha/clessy/tg"
 )
 
+func initmods() {
+	initviaggi()
+}
+
 func dispatch(broker *tg.Broker, update tg.APIMessage) {
 	metafora(broker, update)
+	viaggi(broker, update)
 }
 
 func isCommand(update tg.APIMessage, cmdname string) bool {
@@ -26,6 +31,8 @@ func main() {
 	brokerAddr := flag.String("broker", "localhost:7314", "Broker address:port")
 	botname = flag.String("botname", "maudbot", "Bot name for /targetet@commands")
 	flag.Parse()
+
+	initmods()
 
 	err := tg.CreateBrokerClient(*brokerAddr, dispatch)
 	if err != nil {
