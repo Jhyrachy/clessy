@@ -42,6 +42,10 @@ func viaggi(broker *tg.Broker, update tg.APIMessage) {
 			return
 		}
 
+		msgs[1] = strings.Replace(msgs[1], ",", "", -1)
+		msgs[1] = strings.Replace(msgs[1], " ", "-", -1)
+		msgs[2] = strings.Replace(msgs[2], ",", "", -1)
+		msgs[2] = strings.Replace(msgs[2], " ", "-", -1)
 		src := url.QueryEscape(msgs[1])
 		dst := url.QueryEscape(msgs[2])
 		url := viaggiurl + "&oName=" + src + "&dName=" + dst
@@ -55,7 +59,7 @@ func viaggi(broker *tg.Broker, update tg.APIMessage) {
 		var outjson Romejson
 		err = json.NewDecoder(resp.Body).Decode(&outjson)
 		if err != nil {
-			oops(err)
+			broker.SendTextMessage(update.Chat, "Hm, Rome2rio non ha trovato nulla, mi spiace :(\nForse non hai scritto bene uno dei due posti?", &update.MessageID)
 			return
 		}
 
